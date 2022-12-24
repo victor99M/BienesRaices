@@ -1,4 +1,6 @@
 import express from "express";
+import csrf from "csurf";
+import cookieParser from "cookie-parser";
 import ususarioRoutes from "./routes/usuarioRoutes.js";
 import db from "./config/db.js";
 //crear la app
@@ -6,6 +8,12 @@ const app = express();
 
 //Hablitar letrua de datos de formulario
 app.use(express.urlencoded({ extended: true }));
+
+//Hablitar Cookie Parser
+app.use(cookieParser());
+
+//Habilitar CSRF
+app.use(csrf({ cookie: true }));
 
 //conexion a la base de datos
 try {
@@ -27,7 +35,7 @@ app.use(express.static("public"));
 app.use("/auth", ususarioRoutes);
 
 //definir un puerto y arrancar el proyecto
-const port = 3000;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`el servidor esta funcionando en el puerto ${port}`);
 });
