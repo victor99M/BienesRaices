@@ -9,7 +9,7 @@ const emailRegistros = async (datos) => {
       pass: process.env.EMAIL_PASS,
     },
   });
-  console.log(datos);
+
   const { email, nombre, token } = datos;
 
   //Enviar el Email
@@ -30,4 +30,35 @@ const emailRegistros = async (datos) => {
   });
 };
 
-export { emailRegistros };
+const emailOlvidePassword = async (datos) => {
+  const transport = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const { email, nombre, token } = datos;
+
+  //Enviar el Email
+  await transport.sendMail({
+    from: "BienesRaices.com",
+    to: email,
+    subject: "Restablece tu password en BienesRaices.com",
+    text: "Restablece tu password en BienesRaices.com",
+    html: `
+    <p>Hola ${nombre},has solitado reestabelecer tu password  en BienesRaices.com<p>
+
+    <p> Sigue el siguinte enlace para generar un nuevo password nuevo:
+    <a href="${process.env.BACKEND_URL}:${
+      process.env.PORT ?? 3000
+    }/auth/olvide-password/${token}">Resatbelecer Password</a></p>
+
+    <p>Si tu no solicitaste el cambio de password, puedes ignroar el mensaje.</p>
+    `,
+  });
+};
+
+export { emailRegistros, emailOlvidePassword };

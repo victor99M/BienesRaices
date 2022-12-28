@@ -1,7 +1,8 @@
 import { check, validationResult } from "express-validator";
 import Usuario from "../models/Usuario.js";
 import { generarId } from "../helpers/tokens.js";
-import { emailRegistros } from "../helpers/emails.js";
+import { emailRegistros, emailOlvidePassword } from "../helpers/emails.js";
+
 const formularioLogin = (req, res) => {
   res.render("auth/login", {
     pagina: "Inicar sesion",
@@ -149,7 +150,29 @@ const resetPassword = async (req, res) => {
       errores: [{ msg: "El Email no existe" }],
     });
   }
+
+  //Generar un token y envia email
+  usuario.token = generarId();
+  await usuario.save();
+
+  //enviar un email
+  emailOlvidePassword({
+    email: usuario.email,
+    nombre: usuario.nombre,
+    token: usuario.token,
+  });
+  //Renderizar un mensaje
+  res.render("templates/mensaje", {
+    pagina: "Reestabelece tu Password",
+    mensaje: "Hemos Enviado un Email con las instrucciones",
+  });
 };
+
+const comprobarToken = (req, res, next) => {
+  next();
+};
+
+const nuevoPassword = (req, res, next) => {};
 
 export {
   formularioLogin,
@@ -158,4 +181,6 @@ export {
   confirmar,
   formularOlvidePassword,
   resetPassword,
+  comprobarToken,
+  nuevoPassword,
 };
