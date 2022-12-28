@@ -115,7 +115,27 @@ const confirmar = async (req, res) => {
 const formularOlvidePassword = (req, res) => {
   res.render("auth/olvide-password", {
     pagina: "Recupera tu acceso a Bienes Raices",
+    csrfToken: req.csrfToken(),
   });
+};
+
+const resetPassword = async (req, res) => {
+  //validacion
+  await check("email").isEmail().withMessage("Eso no parece un email").run(req);
+
+  let resultado = validationResult(req);
+
+  //verificar que el resultado este vacio
+  if (!resultado.isEmpty()) {
+    //errores
+    return res.render("auth/olvide-password", {
+      pagina: "Recupera tu acceso a Bienes Raices",
+      csrfToken: req.csrfToken(),
+      errores: resultado.array(),
+    });
+  }
+
+  //Buscar el usaurio
 };
 
 export {
@@ -124,4 +144,5 @@ export {
   registrar,
   confirmar,
   formularOlvidePassword,
+  resetPassword,
 };
