@@ -24,6 +24,6 @@ router.get("/olvide-password", formularOlvidePassword);
 router.post("/olvide-password", resetPassword);
 
 //Almacena el nuevo password
-router.get("/auth/olvide-password/:token", comprobarToken);
-router.post("/auth/olvide-password/:token", nuevoPassword);
+router.get("/olvide-password/:token", comprobarToken);
+router.post("/olvide-password/:token", nuevoPassword);
 export default router;

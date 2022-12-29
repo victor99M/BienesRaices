@@ -1,4 +1,5 @@
 import { check, validationResult } from "express-validator";
+import bcrypt from "bcrypt";
 import Usuario from "../models/Usuario.js";
 import { generarId } from "../helpers/tokens.js";
 import { emailRegistros, emailOlvidePassword } from "../helpers/emails.js";
@@ -168,11 +169,59 @@ const resetPassword = async (req, res) => {
   });
 };
 
-const comprobarToken = (req, res, next) => {
-  next();
+const comprobarToken = async (req, res) => {
+  const { token } = req.params;
+  const usuario = await Usuario.findOne({ where: { token } });
+
+  if (!usuario) {
+    res.render("auth/confirmar-cuenta", {
+      pagina: "Reestabelce tu password",
+      mensaje: "Hubo un error al Validar tu informacion, intenta de nuevo",
+      error: true,
+    });
+  }
+
+  //mostrar formulario para modificar password
+
+  res.render("auth/reset-password", {
+    pagina: "Restabelece tu password",
+    csrfToken: req.csrfToken(),
+  });
 };
 
-const nuevoPassword = (req, res, next) => {};
+const nuevoPassword = async (req, res) => {
+  //Validar el passowrd
+  await check("password")
+    .isLength({ min: 6 })
+    .withMessage("Debe ded ser de almenos 6 caracteres")
+    .run(req);
+  let resultado = validationResult(req);
+  //verificar que el resultado este vacio
+  if (!resultado.isEmpty()) {
+    //errores
+    return res.render("auth/reset-password", {
+      pagina: "Restablece tu password",
+      csrfToken: req.csrfToken(),
+      errores: resultado.array(),
+    });
+  }
+
+  const { token } = req.params;
+  const { password } = req.body;
+  //Identifcar quien hace el cambio
+  const usuario = await Usuario.findOne({ where: { token } });
+
+  //Hashear el nuevo password
+  const salt = await bcrypt.genSalt(10);
+  usuario.password = await bcrypt.hash(password, salt);
+  usuario.token = null;
+  await usuario.save();
+
+  res.render("auth/confirmar-cuenta", {
+    pagina: "password restabelecido",
+    mensaje: "El Password se guardo correctamente",
+  });
+};
 
 export {
   formularioLogin,
