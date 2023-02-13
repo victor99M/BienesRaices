@@ -68,6 +68,7 @@ const autenticar = async (req, res) => {
   return res
     .cookie("_token", token, {
       httpOnly: true,
+      //expires:
       //secure: true,
       //sameSite:true,
     })
